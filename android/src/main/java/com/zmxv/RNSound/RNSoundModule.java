@@ -7,6 +7,7 @@ import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.net.Uri;
 import android.media.AudioManager;
+import android.media.AudioAttributes;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
@@ -77,29 +78,32 @@ public class RNSoundModule extends ReactContextBaseJavaModule implements AudioMa
       Integer category = null;
       switch (module.category) {
         case "Playback":
-          category = AudioManager.STREAM_MUSIC;
+          category = AudioAttributes.CONTENT_TYPE_MUSIC;
           break;
         case "Ambient":
-          category = AudioManager.STREAM_NOTIFICATION;
+          category = AudioAttributes.CONTENT_TYPE_SONIFICATION;
           break;
         case "System":
-          category = AudioManager.STREAM_SYSTEM;
+          category = AudioAttributes.CONTENT_TYPE_SONIFICATION;
           break;
         case "Voice":
-          category = AudioManager.STREAM_VOICE_CALL;
+          category = AudioAttributes.CONTENT_TYPE_SPEECH;
           break;
         case "Ring":
-          category = AudioManager.STREAM_RING;
+          category = AudioAttributes.CONTENT_TYPE_UNKNOWN;
           break;
         case "Alarm":
-          category = AudioManager.STREAM_ALARM;
+          category = AudioAttributes.CONTENT_TYPE_UNKNOWN;
           break;
         default:
           Log.e("RNSoundModule", String.format("Unrecognised category %s", module.category));
           break;
       }
       if (category != null) {
-        player.setAudioStreamType(category);
+        player.setAudioAttributes(new AudioAttributes
+        .Builder()
+        .setContentType(category)
+        .build());
       }
     }
 
@@ -172,7 +176,11 @@ public class RNSoundModule extends ReactContextBaseJavaModule implements AudioMa
     }
 
     if (fileName.startsWith("http://") || fileName.startsWith("https://")) {
-      mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+      mediaPlayer.setAudioAttributes(
+        new AudioAttributes
+           .Builder()
+           .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+           .build());
       Log.i("RNSoundModule", fileName);
       try {
         mediaPlayer.setDataSource(fileName);
@@ -207,7 +215,11 @@ public class RNSoundModule extends ReactContextBaseJavaModule implements AudioMa
     
     File file = new File(fileName);
     if (file.exists()) {
-      mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+      mediaPlayer.setAudioAttributes(
+        new AudioAttributes
+           .Builder()
+           .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+           .build());
       Log.i("RNSoundModule", fileName);
       try {
           mediaPlayer.setDataSource(fileName);
